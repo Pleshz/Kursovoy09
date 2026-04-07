@@ -1,0 +1,245 @@
+<template>
+  <body class="min-h-screen bg-gray-50 text-gray-800">
+    <header class="border-b border-solid border-gray-200 bg-white">
+      <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-4 max-w-6xl mx-auto">
+        <router-link to="/" class="text-2xl font-bold text-gray-900 no-underline">
+          CarShare
+        </router-link>
+        <nav class="flex flex-wrap items-center gap-4 text-sm font-semibold" aria-label="Основная навигация">
+          <router-link to="/login" class="text-blue-600 hover:text-blue-700 transition duration-200 ease-in-out">
+            Войти
+          </router-link>
+          <router-link
+            to="/register"
+            class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out"
+          >
+            Регистрация
+          </router-link>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="px-6 py-12 lg:py-16">
+        <div class="max-w-6xl mx-auto">
+          <div class="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap g-6">
+            <div class="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0">
+              <img
+                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                class="w-full rounded shadow-md"
+                alt="Аренда автомобиля через сервис каршеринга CarShare"
+                width="800"
+                height="600"
+                decoding="async"
+              />
+            </div>
+            <div class="xl:ml-20 xl:w-5/12 lg:w-5/12 md:w-8/12 mb-12 md:mb-0">
+              <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 pb-4">
+                Каршеринг CarShare — аренда авто по минутам и часам
+              </h1>
+              <p class="text-lg text-gray-700 pb-6 leading-relaxed">
+                Забирайте автомобиль в нескольких кликах: онлайн-бронирование, прозрачные тарифы, страхование и техподдержка 24/7.
+                Подходит для поездок по городу и за его пределами.
+              </p>
+              <div class="flex flex-wrap gap-4 text-center lg:text-left">
+                <router-link
+                  to="/register"
+                  class="inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
+                >
+                  Начать
+                </router-link>
+                <router-link
+                  to="/login"
+                  class="inline-block px-7 py-3 bg-white text-blue-600 font-medium text-sm leading-snug uppercase rounded border border-solid border-gray-300 shadow-sm hover:bg-gray-50 transition duration-150 ease-in-out"
+                >
+                  Войти в аккаунт
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="px-6 py-12 bg-white border-y border-solid border-gray-200">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold pb-6 text-gray-900">О компании CarShare</h2>
+          <div class="grid md:grid-cols-2 gap-8 text-gray-700 leading-relaxed text-lg">
+            <div>
+              <p class="pb-4">
+                CarShare — сервис краткосрочной аренды автомобилей (каршеринг) для жителей и гостей города.
+                Мы объединяем парк современных машин, удобные зоны выдачи и цифровой сервис без очередей в офисе.
+              </p>
+              <p>
+                Наша миссия — сделать мобильность доступной: вы платите только за время использования, без скрытых платежей.
+                В личном кабинете доступна история поездок, чеки и расшифровка тарифа.
+              </p>
+            </div>
+            <ul class="list-none p-0 m-0 space-y-3">
+              <li class="flex gap-3">
+                <span class="font-bold text-blue-600 shrink-0">•</span>
+                <span>Лицензированная деятельность и договор оферты в электронном виде</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="font-bold text-blue-600 shrink-0">•</span>
+                <span>Техосмотр, ОСАГО и регламентное обслуживание парка</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="font-bold text-blue-600 shrink-0">•</span>
+                <span>Поддержка пользователей</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="services" class="px-6 py-12">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold pb-2 text-gray-900">Услуги и тарифы</h2>
+          <p class="text-gray-700 pb-8 max-w-3xl text-lg leading-relaxed">
+            Выберите формат аренды под задачу: минутная оплата в городе, почасовой пакет для деловых поездок или сутки для поездок за город.
+          </p>
+          <div class="grid md:grid-cols-3 gap-6">
+            <article
+              v-for="item in services"
+              :key="item.title"
+              class="bg-white border border-solid border-gray-300 rounded shadow-sm p-6 transition ease-in-out hover:shadow-md"
+            >
+              <h3 class="text-xl font-bold text-gray-900 pb-3">{{ item.title }}</h3>
+              <p class="text-gray-700 leading-relaxed">{{ item.text }}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="team" class="px-6 py-12 bg-white border-t border-solid border-gray-200">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold pb-2 text-gray-900">Команда</h2>
+          <p class="text-gray-700 pb-8 max-w-3xl text-lg leading-relaxed">
+            За CarShare стоят специалисты по операциям, IT, клиентскому сервису и безопасности парка.
+          </p>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <article
+              v-for="person in team"
+              :key="person.name"
+              class="border border-solid border-gray-300 rounded p-6 bg-gray-50 text-center"
+            >
+              <div
+                class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold"
+                aria-hidden="true"
+              >
+                {{ person.initials }}
+              </div>
+              <h3 class="text-lg font-bold text-gray-900">{{ person.name }}</h3>
+              <p class="text-sm text-gray-600 pt-1">{{ person.role }}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 py-12" aria-labelledby="seo-heading">
+        <div class="max-w-6xl mx-auto text-gray-700">
+          <h2 id="seo-heading" class="text-3xl font-bold text-gray-900 pb-4">
+            Полезная информация для пользователей и поисковых систем
+          </h2>
+          <p class="pb-4 leading-relaxed">
+            Каршеринг CarShare — это вид мобильности, при котором автомобиль арендуется через приложение или веб-интерфейс на короткий срок.
+            Сервис подходит тем, кому не нужен личный автомобиль каждый день: поездки на встречи, выезд за покупками, транспорт для гостей города.
+          </p>
+          <h3 class="text-xl font-bold text-gray-900 pt-4 pb-2">Как работает сервис</h3>
+          <p class="pb-4 leading-relaxed">
+            Регистрация, верификация данных, привязка способа оплаты и выбор автомобиля на карте. После завершения поездки стоимость рассчитывается автоматически по тарифу и времени использования.
+            Документы и условия использования доступны до начала аренды.
+          </p>
+          <h3 class="text-xl font-bold text-gray-900 pt-4 pb-2">Безопасность и конфиденциальность</h3>
+          <p class="leading-relaxed">
+            Мы обрабатываем персональные данные в соответствии с применимым законодательством и политикой конфиденциальности.
+            Техническая безопасность аккаунта — через устойчивые пароли и рекомендации по защите устройства.
+          </p>
+        </div>
+      </section>
+
+      <section id="contacts" class="px-6 py-12 bg-white border-t border-solid border-gray-200">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold pb-6 text-gray-900">Контакты</h2>
+          <div class="grid md:grid-cols-2 gap-8">
+            <address class="not-italic text-gray-700 leading-relaxed text-lg">
+              <p class="font-bold text-gray-900 pb-2">ООО «КарШер Плюс»</p>
+              <p>Юридический адрес: г. Пермь, ул. Луначарского, д. 24</p>
+              <p class="pt-2">
+                Email:
+                <a href="mailto:pleskovd96@gmail.com" class="text-blue-600 hover:text-blue-700">pleskovd96@gmail.com</a>
+              </p>
+              <p>
+                Телефон:
+                <a href="tel:+79526588289" class="text-blue-600 hover:text-blue-700">+7 (952) 658-82-89</a>
+              </p>
+            </address>
+            <div class="text-gray-700 leading-relaxed text-lg">
+              <p class="pb-4">
+                Время работы службы поддержки: ежедневно с 08:00 до 22:00 по московскому времени.
+              </p>
+              <router-link
+                to="/register"
+                class="inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 transition duration-150 ease-in-out"
+              >
+                Зарегистрироваться
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="px-6 py-8 border-t border-solid border-gray-200 bg-gray-100 text-sm text-gray-600">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <p class="m-0">© {{ year }} CarShare. Все права защищены.</p>
+        <div class="flex flex-wrap gap-4">
+          <router-link to="/login" class="text-gray-700 hover:text-blue-600">Вход</router-link>
+          <router-link to="/register" class="text-gray-700 hover:text-blue-600">Регистрация</router-link>
+        </div>
+      </div>
+    </footer>
+  </body>
+</template>
+
+<script setup>
+import { computed, onMounted } from 'vue'
+
+const year = computed(() => new Date().getFullYear())
+
+const services = [
+  {
+    title: 'Минутный тариф',
+    text: 'Оплата по времени и пробегу в городе. Удобно для коротких поездок и мультимодальных маршрутов.',
+  },
+  {
+    title: 'Почасовые пакеты',
+    text: 'Зафиксированный пакет часов для встреч и дел без сюрпризов в чеке.',
+  },
+  {
+    title: 'Суточная аренда',
+    text: 'Автомобиль на целый день или выходные — для поездок за город и длительных маршрутов.',
+  },
+]
+
+const team = [
+  { name: 'Анна Смирнова', role: 'Руководитель операций', initials: 'АС' },
+  { name: 'Дмитрий Орлов', role: 'CTO, продукт и платформа', initials: 'ДО' },
+  { name: 'Елена Козлова', role: 'Клиентский сервис', initials: 'ЕК' },
+  { name: 'Иван Петров', role: 'Безопасность парка', initials: 'ИП' },
+]
+
+onMounted(() => {
+  document.title = 'CarShare — каршеринг: аренда автомобиля онлайн'
+  let meta = document.querySelector('meta[name="description"]')
+  if (!meta) {
+    meta = document.createElement('meta')
+    meta.setAttribute('name', 'description')
+    document.head.appendChild(meta)
+  }
+  meta.setAttribute(
+    'content',
+    'CarShare — сервис каршеринга: краткосрочная аренда авто, прозрачные тарифы, онлайн-регистрация. О компании, услуги, команда и контакты.',
+  )
+})
+</script>
