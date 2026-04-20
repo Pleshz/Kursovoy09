@@ -12,7 +12,7 @@
           <router-link to="/account" class="text-gray-700 hover:text-blue-600 transition duration-200 ease-in-out">
             Личный кабинет
           </router-link>
-          <router-link to="/login" class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out">
+          <router-link to="/login" @click="logout" class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out">
             Выйти
           </router-link>
         </nav>
@@ -96,10 +96,13 @@
 
           <button
             type="button"
+            @click="submitDocuments"
             class="mt-5 w-full inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
           >
             Отправить на проверку
           </button>
+          <p v-if="statusMessage" class="text-sm text-green-700 mt-3">{{ statusMessage }}</p>
+          <p v-if="errorMessage" class="text-sm text-red-600 mt-3">{{ errorMessage }}</p>
 
         </aside>
       </section>
@@ -108,7 +111,8 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, reactive } from 'vue'
+import { onBeforeUnmount, reactive, ref } from 'vue'
+import { api, performLogout } from '../../lib/api'
 
 const previews = reactive({
   passport: '',
@@ -121,6 +125,17 @@ const objectUrls = reactive({
   license: '',
   selfie: '',
 })
+const selectedFiles = reactive({
+  passport: null,
+  license: null,
+  selfie: null,
+})
+const statusMessage = ref('')
+const errorMessage = ref('')
+
+async function logout() {
+  await performLogout()
+}
 
 function setPreview(key, file) {
   if (objectUrls[key]) URL.revokeObjectURL(objectUrls[key])
@@ -131,7 +146,39 @@ function setPreview(key, file) {
 function onPick(event, key) {
   const file = event?.target?.files?.[0]
   if (!file) return
+  selectedFiles[key] = file
   setPreview(key, file)
+}
+
+async function uploadOne(type, file) {
+  const formData = new FormData()
+  formData.append('type', type)
+  formData.append('file', file)
+  await api.post('/documents', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
+async function submitDocuments() {
+  statusMessage.value = ''
+  errorMessage.value = ''
+
+  try {
+    const uploads = []
+    for (const type of ['passport', 'license', 'selfie']) {
+      if (selectedFiles[type]) {
+        uploads.push(uploadOne(type, selectedFiles[type]))
+      }
+    }
+    if (uploads.length === 0) {
+      errorMessage.value = 'Выберите хотя бы один файл.'
+      return
+    }
+    await Promise.all(uploads)
+    statusMessage.value = 'Документы отправлены на проверку.'
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.message || 'Не удалось отправить документы.'
+  }
 }
 
 onBeforeUnmount(() => {

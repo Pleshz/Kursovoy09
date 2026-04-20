@@ -12,7 +12,7 @@
           <router-link to="/account" class="text-gray-600 hover:text-blue-600 transition duration-200 ease-in-out">
             Личный кабинет
           </router-link>
-          <router-link to="/login" class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out">
+          <router-link to="/login" @click="logout" class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out">
             Выйти
           </router-link>
         </nav>
@@ -38,6 +38,7 @@
                 <select
                   id="segment"
                   class="block w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:border-blue-600"
+                  v-model="filters.segment"
                 >
                   <option selected>Любой</option>
                   <option>Эконом</option>
@@ -51,6 +52,7 @@
                 <select
                   id="transmission"
                   class="block w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:border-blue-600"
+                  v-model="filters.transmission"
                 >
                   <option selected>Любая</option>
                   <option>Автомат</option>
@@ -66,6 +68,7 @@
                   step="1"
                   class="block w-full px-3 py-2 border border-gray-300 rounded text-sm text-gray-700 focus:outline-none focus:border-blue-600"
                   placeholder="15"
+                  v-model.number="filters.maxRateMinute"
                 />
               </div>
             </div>
@@ -79,11 +82,17 @@
         </div>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <article
-            v-for="car in cars"
+            v-for="car in filteredCars"
             :key="car.name"
             class="bg-white border border-solid border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col"
           >
-            <div class="h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+            <img
+              v-if="car.imageUrl"
+              :src="car.imageUrl"
+              :alt="car.name"
+              class="h-40 w-full object-cover"
+            />
+            <div v-else class="h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
               Изображение автомобиля
             </div>
             <div class="p-4 flex-1 flex flex-col">
@@ -142,74 +151,53 @@
 </template>
 
 <script setup>
-const cars = [
-  {
-    name: 'Hyundai Solaris',
-    segment: 'Эконом',
-    transmission: 'Автомат',
-    fuel: 'Бензин',
-    description: 'Городской седан для повседневных поездок и деловых встреч.',
-    rateMinute: 10,
-    rateHour: 350,
-    rateDay: 1900,
-    range: 450,
-  },
-  {
-    name: 'Kia Rio X-Line',
-    segment: 'Комфорт',
-    transmission: 'Автомат',
-    fuel: 'Бензин',
-    description: 'Универсал с увеличенным клиренсом для города и пригорода.',
-    rateMinute: 12,
-    rateHour: 420,
-    rateDay: 2200,
-    range: 480,
-  },
-  {
-    name: 'Skoda Octavia',
-    segment: 'Комфорт',
-    transmission: 'Автомат',
-    fuel: 'Дизель',
-    description: 'Просторный салон и увеличенный багажник для семейных поездок.',
-    rateMinute: 14,
-    rateHour: 480,
-    rateDay: 2600,
-    range: 650,
-  },
-  {
-    name: 'Tesla Model 3',
-    segment: 'Электро',
-    transmission: 'Автомат',
-    fuel: 'Электро',
-    description: 'Электроседан с быстрым разгоном и доступом к зарядной сети.',
-    rateMinute: 18,
-    rateHour: 650,
-    rateDay: 3900,
-    range: 380,
-  },
-  {
-    name: 'BMW 3 Series',
-    segment: 'Бизнес',
-    transmission: 'Автомат',
-    fuel: 'Бензин',
-    description: 'Бизнес-седан для деловых поездок и встреч с клиентами.',
-    rateMinute: 20,
-    rateHour: 720,
-    rateDay: 4300,
-    range: 520,
-  },
-  {
-    name: 'Renault Kaptur',
-    segment: 'Комфорт',
-    transmission: 'Автомат',
-    fuel: 'Бензин',
-    description: 'Кроссовер для поездок по городу и за его пределами.',
-    rateMinute: 13,
-    rateHour: 460,
-    rateDay: 2500,
-    range: 500,
-  },
-]
+import { computed, onMounted, reactive, ref } from 'vue'
+import { api, performLogout } from '../../lib/api'
+
+const cars = ref([])
+const filters = reactive({
+  segment: 'Любой',
+  transmission: 'Любая',
+  maxRateMinute: null,
+})
+
+const filteredCars = computed(() => {
+  return cars.value.filter((car) => {
+    const bySegment = filters.segment === 'Любой' || car.segment === filters.segment
+    const byTransmission = filters.transmission === 'Любая' || car.transmission === filters.transmission
+    const byPrice =
+      !filters.maxRateMinute || Number(car.rateMinute) <= Number(filters.maxRateMinute)
+    return bySegment && byTransmission && byPrice
+  })
+})
+
+async function loadCars() {
+  const response = await api.get('/cars')
+  const rawCars = response?.data?.data || []
+  cars.value = rawCars.map((car) => ({
+    id: car.id,
+    name: car.name,
+    segment: car.segment,
+    transmission: car.transmission,
+    fuel: car.fuel,
+    description: car.description,
+    imageUrl: car.image_url || '',
+    rateMinute: car.rate_minute,
+    rateHour: car.rate_hour,
+    rateDay: car.rate_day,
+    range: car.range_km,
+  }))
+}
+
+onMounted(() => {
+  loadCars().catch((error) => {
+    console.error('Cars load error:', error)
+  })
+})
+
+async function logout() {
+  await performLogout()
+}
 
 const lastTrips = [
   { id: 1, route: 'Центр → БЦ «Премьер»', cost: '310 ₽', date: 'вчера' },

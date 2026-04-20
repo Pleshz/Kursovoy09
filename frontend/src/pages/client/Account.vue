@@ -12,7 +12,7 @@
           <router-link to="/account" class="text-blue-600 hover:text-blue-700 transition duration-200 ease-in-out">
             Личный кабинет
           </router-link>
-          <router-link to="/login" class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out">
+          <router-link to="/login" @click="logout" class="text-red-600 hover:text-red-700 transition duration-200 ease-in-out">
             Выйти
           </router-link>
         </nav>
@@ -24,81 +24,60 @@
       <section class="max-w-6xl mx-auto mb-10">
         <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 pb-3">Личный кабинет</h1>
         <p class="text-gray-700 text-lg leading-relaxed pb-4">
-          Здесь собрана основная информация о вашем профиле, способах оплаты и истории поездок.
+          Здесь собрана основная информация о вашем профиле и статусе аккаунта.
         </p>
       </section>
 
-      <!-- Профиль + статистика -->
+      <section class="max-w-6xl mx-auto mb-6">
+        <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
+      </section>
+
       <section class="max-w-6xl mx-auto mb-10 grid lg:grid-cols-3 gap-6">
         <section class="bg-white border border-solid border-gray-200 rounded-2xl p-5 shadow-sm lg:col-span-2">
           <h2 class="text-xl font-bold text-gray-900 mb-4">Профиль</h2>
-          <dl class="grid sm:grid-cols-2 gap-4 text-sm text-gray-700">
+          <p v-if="isLoading" class="text-sm text-gray-500">Загрузка профиля...</p>
+          <dl v-else class="grid sm:grid-cols-2 gap-4 text-sm text-gray-700">
             <div>
-              <dt class="font-semibold text-gray-900 mb-1">ФИО</dt>
-              <dd>{{ profile.fullName }}</dd>
+              <dt class="font-semibold text-gray-900 mb-1">Имя</dt>
+              <dd>{{ profile.name }}</dd>
             </div>
             <div>
               <dt class="font-semibold text-gray-900 mb-1">Email</dt>
               <dd>{{ profile.email }}</dd>
             </div>
             <div>
-              <dt class="font-semibold text-gray-900 mb-1">Телефон</dt>
-              <dd>{{ profile.phone }}</dd>
-            </div>
-            <div>
-              <dt class="font-semibold text-gray-900 mb-1">Статус аккаунта</dt>
-              <dd>{{ profile.status }}</dd>
-            </div>
-            <div>
-              <dt class="font-semibold text-gray-900 mb-1">Права на управление</dt>
-              <dd>{{ profile.rights }}</dd>
-            </div>
-            <div>
-              <dt class="font-semibold text-gray-900 mb-1">Город</dt>
-              <dd>{{ profile.city }}</dd>
+              <dt class="font-semibold text-gray-900 mb-1">Дата регистрации</dt>
+              <dd>{{ profile.registeredAt }}</dd>
             </div>
           </dl>
         </section>
 
         <section class="bg-white border border-solid border-gray-200 rounded-2xl p-5 shadow-sm">
-          <h2 class="text-xl font-bold text-gray-900 mb-4">Статистика поездок</h2>
+          <h2 class="text-xl font-bold text-gray-900 mb-4">Сводка</h2>
           <dl class="space-y-2 text-sm text-gray-700">
             <div class="flex justify-between">
-              <dt class="font-semibold">Всего поездок</dt>
-              <dd>{{ stats.totalTrips }}</dd>
+              <dt class="font-semibold">Почта подтверждена</dt>
+              <dd>{{ profile.emailVerified }}</dd>
             </div>
             <div class="flex justify-between">
-              <dt class="font-semibold">Общий пробег</dt>
-              <dd>{{ stats.totalDistance }} км</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="font-semibold">Время за рулём</dt>
-              <dd>{{ stats.totalTime }}</dd>
-            </div>
-            <div class="flex justify-between">
-              <dt class="font-semibold">Средняя стоимость поездки</dt>
-              <dd>{{ stats.avgTripCost }} ₽</dd>
+              <dt class="font-semibold">Последнее обновление</dt>
+              <dd>{{ profile.updatedAt }}</dd>
             </div>
           </dl>
         </section>
       </section>
 
-      <!-- Платёжные данные + Документы -->
       <section class="max-w-6xl mx-auto mb-10 grid md:grid-cols-2 gap-6">
         <section class="bg-white border border-solid border-gray-200 rounded-2xl p-5 shadow-sm">
           <h2 class="text-xl font-bold text-gray-900 mb-4">Документы</h2>
           <ul class="space-y-3 text-sm text-gray-700">
             <li class="flex justify-between">
               <span>Паспорт</span>
-              <span class="text-gray-500">Подтверждён</span>
+              <span class="text-gray-500">{{ documentStatuses.passport }}</span>
             </li>
             <li class="flex justify-between">
               <span>Водительское удостоверение</span>
-              <span class="text-gray-500">Подтверждено</span>
-            </li>
-            <li class="flex justify-between">
-              <span>Договор оферты</span>
-              <span class="text-gray-500">Принят</span>
+              <span class="text-gray-500">{{ documentStatuses.license }}</span>
             </li>
           </ul>
 
@@ -115,24 +94,89 @@
 </template>
 
 <script setup>
-const profile = {
-  fullName: 'Иван Иванов',
-  email: 'ivan.ivanov@example.com',
-  phone: '+7 (900) 000-00-00',
-  status: 'Активен',
-  rights: 'Разрешено управление автомобилями класса Эконом и Комфорт',
-  city: 'Пермь',
+import { onMounted, reactive, ref } from 'vue'
+import { api, performLogout } from '../../lib/api'
+
+const isLoading = ref(true)
+const errorMessage = ref('')
+
+const profile = reactive({
+  name: '—',
+  email: '—',
+  registeredAt: '—',
+  updatedAt: '—',
+  emailVerified: 'Нет',
+})
+const documentStatuses = reactive({
+  passport: 'Не загружено',
+  license: 'Не загружено',
+})
+
+async function logout() {
+  await performLogout()
 }
 
-const stats = {
-  totalTrips: 42,
-  totalDistance: 860,
-  totalTime: '37 ч',
-  avgTripCost: 420,
+function formatDate(value) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('ru-RU')
 }
 
-const paymentMethods = [
-  { id: 1, mask: 'VISA •••• 1234', label: 'Основная карта' },
-  { id: 2, mask: 'Mastercard •••• 5678', label: 'Резервная' },
-]
+function mapRoleLabel(role) {
+  if (role === 'admin') return 'Администратор'
+  if (role === 'client') return 'Клиент'
+  return role || '—'
+}
+
+function mapDocumentStatus(status) {
+  if (status === 'uploaded') return 'В обработке'
+  if (status === 'verified') return 'Подтверждено'
+  if (status === 'rejected') return 'Отклонено'
+  return 'Не загружено'
+}
+
+async function loadProfile() {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    const response = await api.get('/auth/me')
+    const user = response?.data?.data || {}
+    profile.name = user.name || '—'
+    profile.email = user.email || '—'
+    profile.registeredAt = formatDate(user.created_at)
+    profile.updatedAt = formatDate(user.updated_at)
+    profile.emailVerified = user.email_verified_at ? 'Да' : 'Нет'
+  } catch (error) {
+    errorMessage.value = error?.response?.data?.message || 'Не удалось загрузить профиль.'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function loadDocumentStatuses() {
+  try {
+    const response = await api.get('/documents')
+    const docs = response?.data?.data || []
+    const byType = {
+      passport: docs.find((doc) => doc.type === 'passport'),
+      license: docs.find((doc) => doc.type === 'license'),
+    }
+
+    documentStatuses.passport = byType.passport
+      ? mapDocumentStatus(byType.passport.status)
+      : 'Не загружено'
+    documentStatuses.license = byType.license
+      ? mapDocumentStatus(byType.license.status)
+      : 'Не загружено'
+  } catch (error) {
+    documentStatuses.passport = 'Не загружено'
+    documentStatuses.license = 'Не загружено'
+  }
+}
+
+onMounted(() => {
+  loadProfile()
+  loadDocumentStatuses()
+})
 </script>

@@ -25,7 +25,7 @@
           <div class="flex xl:justify-center lg:justify-between justify-center items-center flex-wrap g-6">
             <div class="grow-0 shrink-1 md:shrink-0 basis-auto xl:w-6/12 lg:w-6/12 md:w-9/12 mb-12 md:mb-0">
               <img
-                src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                src="https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 class="w-full rounded shadow-md"
                 alt="Аренда автомобиля через сервис каршеринга CarShare"
                 width="800"
